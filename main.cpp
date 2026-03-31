@@ -10,14 +10,16 @@
 MetricsQueue metrics_q;
 
 void handleBookUpdate(BookUpdate& u) {
-    uint64_t now = KrakenDataIngestor::now_ns();
-    u.t_processed = now;
+    uint64_t start = KrakenDataIngestor::now_ns();
     
     LatencyEvent e;
     e.parse_ns = u.t_parsed - u.t_ingest;
-    e.process_ns = u.t_processed - u.t_parsed;
-    e.total_ns = u.t_processed - u.t_ingest;
-    e.timestamp = KrakenDataIngestor::now_ns();
+    e.dispatch_ns = start - u.t_parsed;
+
+    uint64_t end = KrakenDataIngestor::now_ns();
+
+    e.process_ns = end - start;
+    e.total_ns = end - u.t_ingest;
 
     metrics_q.push(e);
 }

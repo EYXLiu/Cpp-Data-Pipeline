@@ -5,9 +5,9 @@
 
 struct LatencyEvent {
     uint64_t parse_ns;
+    uint64_t dispatch_ns;
     uint64_t process_ns;
     uint64_t total_ns;
-    uint64_t timestamp;
 };
 
 #endif
