@@ -1,2 +1,2 @@
 # Latency Focused Data Pipeline
-Being repurposed from a previous project (I lost sight of what I was doing and gave up)
+Previously was a networking runtime, being repurposed to a C++ data pipeline, focusing on latency (I lost track of what I was doing and wanted a clear goal)
