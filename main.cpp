@@ -4,43 +4,28 @@
 #include <kraken_ingestor.hpp>
 #include <thread>
 #include <iostream>
+#include <latency_event.hpp>
+#include <metrics_thread.hpp>
 
+MetricsQueue metrics_q;
+
+void handleBookUpdate(BookUpdate& u) {
+    uint64_t now = KrakenDataIngestor::now_ns();
+    u.t_processed = now;
+    
+    LatencyEvent e;
+    e.parse_ns = u.t_parsed - u.t_ingest;
+    e.process_ns = u.t_processed - u.t_parsed;
+    e.total_ns = u.t_processed - u.t_ingest;
+    e.timestamp = KrakenDataIngestor::now_ns();
+
+    metrics_q.push(e);
+}
 
 int main() {
-    KrakenDataIngestor ingestor([](const BookUpdate& u) {
-        std::cout << (u.is_bid ? "BID" : "ASK")
-                  << " " << u.price
-                  << " " << u.qty
-                  << std::endl;
-    });
+    std::thread t(metricsThread, std::ref(metrics_q));
+    t.detach();
 
+    KrakenDataIngestor ingestor(handleBookUpdate);
     ingestor.start();
 }
-
-/*
-int main() {
-    int num_reactors = std::thread::hardware_concurrency();
-    std::vector<std::unique_ptr<Reactor>> reactors;
-    std::vector<Reactor*> reactor_ptrs;
-    std::vector<std::thread> reactor_threads;
-
-    if (num_reactors == 0) num_reactors = 2;
-
-    for (int i = 0; i < num_reactors; i++) {
-        auto r = std::make_unique<Reactor>();
-        reactor_ptrs.push_back(r.get());
-        reactors.push_back(std::move(r));
-        reactor_threads.emplace_back([i, &reactors]() {
-            reactors[i]->run();
-        });
-    }
-
-    Reactor reactor;
-    BufferPool buffer_pool(128, 4096);
-    Acceptor acceptor(8080, reactor, buffer_pool);
-
-
-    reactor.add_fd(acceptor.get_fd(), true, false, &acceptor);
-    reactor.run();
-}
-*/

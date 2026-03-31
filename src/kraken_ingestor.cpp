@@ -65,13 +65,15 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
     using json = nlohmann::json;
 
     try {
+        uint64_t ingested = now_ns();
+
         auto j = json::parse(msg);
 
         if (!j.is_array()) return;
 
         auto& data = j[1];
 
-        uint64_t ts = now_ns();
+        uint64_t parsed = now_ns();
 
         if (data.contains("b")) {
             for (auto& bid : data["b"]) {
@@ -79,7 +81,8 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
                 u.price = std::stod(bid[0].get<std::string>());
                 u.qty   = std::stod(bid[1].get<std::string>());
                 u.is_bid = true;
-                u.ts = ts;
+                u.t_ingest = ingested;
+                u.t_parsed = parsed;
 
                 callback_(u);
             }
@@ -91,7 +94,8 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
                 u.price = std::stod(ask[0].get<std::string>());
                 u.qty   = std::stod(ask[1].get<std::string>());
                 u.is_bid = false;
-                u.ts = ts;
+                u.t_ingest = ingested;
+                u.t_parsed = parsed;
 
                 callback_(u);
             }
