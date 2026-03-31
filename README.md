@@ -2,7 +2,7 @@
 Previously was a networking runtime, being repurposed to a C++ data pipeline, focusing on latency (I lost track of what I was doing and wanted a clear goal)
 
 # Inital baseline 
-<small> commit 8cac493da0753205929f9d66786bf87fa9a778fd </small>  
+<sub> commit 8cac493da0753205929f9d66786bf87fa9a778fd </sub>  
 PARSE    p50=18.959us p90=36.083us p99=60.791us  
 DISPATCH p50=1.875us p90=8.625us p99=58.625us  
 PROCESS  p50=0.042us p90=0.042us p99=0.083us  
