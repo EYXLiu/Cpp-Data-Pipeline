@@ -25,8 +25,8 @@ void metricsThread(MetricsQueue& q) {
             dispatch_samples.push_back(e.dispatch_ns);
             process_samples.push_back(e.process_ns);
             total_samples.push_back(e.total_ns);
+            std::cout << "Total samples size: " << total_samples.size() << "\r" << std::flush;
         }
-
         if (total_samples.size() >= 1000) {
             auto report = [](std::vector<uint64_t>& v) {
                 auto idx = [&](double p) {

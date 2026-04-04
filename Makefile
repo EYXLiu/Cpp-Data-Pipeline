@@ -14,7 +14,7 @@ SRC = main.cpp ./src/*.cpp
 
 all: $(EXEC)
 
-$(EXEC):
+$(EXEC): $(SRC)
 	$(CXX) $(CXXFLAGS) -o $(EXEC) $(SRC) $(LDFLAGS) $(LDLIBS)
 
 run: $(EXEC)

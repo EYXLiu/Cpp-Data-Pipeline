@@ -4,6 +4,7 @@ Previously was a networking runtime, being repurposed to a C++ data pipeline, fo
 
 # Inital baseline 
 commit 8cac493da0753205929f9d66786bf87fa9a778fd  
+Uses nholmann json and stod
 |Step      |Median Percentile|90th Percentile  |99th Percentile  |
 |----------|-----------------|-----------------|-----------------|
 | PARSE    | p50=18.959us    | p90=36.083us    | p99=60.791us    |
