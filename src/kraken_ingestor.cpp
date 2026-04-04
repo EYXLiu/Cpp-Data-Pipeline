@@ -3,7 +3,7 @@
 #include <boost/beast/ssl.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-#include <regex>
+#include <nlohmann/json.hpp>
 #include <iostream>
 
 KrakenDataIngestor::KrakenDataIngestor(Callback cb) : callback_(cb) {}
@@ -61,39 +61,51 @@ uint64_t KrakenDataIngestor::now_ns() {
     return ts.tv_sec * 1e9 + ts.tv_nsec;
 }
 
+// rapidjson, simdjson
 void KrakenDataIngestor::handle_message(const std::string& msg) {
-    uint64_t ingested = now_ns();
+    using json = nlohmann::json;
 
-    std::regex block_re(R"REGEX("([ab])"\s*:\s*(\[[^\]]+\]))REGEX");
-    std::regex entry_re(
-        R"REGEX(\["([0-9.]+)","([0-9.]+)","[0-9.]+"(?:,"r")?\])REGEX"
-    );
+    try {
+        uint64_t ingested = now_ns();
 
-    auto block_begin = std::sregex_iterator(msg.begin(), msg.end(), block_re);
-    auto block_end = std::sregex_iterator();
+        auto j = json::parse(msg);
 
-    for (auto it = block_begin; it != block_end; ++it) {
-        std::smatch block_match = *it;
+        if (!j.is_array()) return;
 
-        bool is_bid = (block_match[1] == "b");
-        std::string entries = block_match[2];
-
-        auto entry_begin = std::sregex_iterator(entries.begin(), entries.end(), entry_re);
-        auto entry_end = std::sregex_iterator();
+        auto& data = j[1];
 
         uint64_t parsed = now_ns();
 
-        for (auto jt = entry_begin; jt != entry_end; ++jt) {
-            std::smatch m = *jt;
+        if (data.contains("b")) {
+            for (auto& bid : data["b"]) {
+                BookUpdate u;
+                u.price = std::stod(bid[0].get<std::string>());
+                u.qty   = std::stod(bid[1].get<std::string>());
+                u.is_bid = true;
+                u.t_ingest = ingested;
+                u.t_parsed = parsed;
 
-            BookUpdate u;
-            u.price = std::stod(m[1].str());
-            u.qty   = std::stod(m[2].str());
-            u.is_bid = is_bid;
-            u.t_ingest = ingested;
-            u.t_parsed = parsed;
-
-            callback_(u);
+                callback_(u);
+            }
         }
+
+        if (data.contains("a")) {
+            for (auto& ask : data["a"]) {
+                BookUpdate u;
+                u.price = std::stod(ask[0].get<std::string>());
+                u.qty   = std::stod(ask[1].get<std::string>());
+                u.is_bid = false;
+                u.t_ingest = ingested;
+                u.t_parsed = parsed;
+
+                callback_(u);
+            }
+        }
+    }
+    catch (const std::exception& e) {
+        std::cerr << "handle_message error: " << e.what() << "\n";
+    }
+    catch (...) {
+        std::cerr << "handle_message unknown error\n";
     }
 }
