@@ -14,3 +14,18 @@ Uses nholmann json and stod
  - High parse times (likely due to JSON and stod) 
  - Wildly varying dispatch times (possibly system error?)
  - Process times look ok 
+
+
+# REGEX
+commit 14798d2b860cdf4a2fb91d3532168a126b1b1dcc  
+Using regex and stod  
+|Step      |Median Percentile|90th Percentile  |99th Percentile  |
+|----------|-----------------|-----------------|-----------------|
+| PARSE    | p50=130.333us   | p90=195.75us    | p99=554.584us   |
+| DISPATCH | p50=3.208us     | p90=5.083us     | p99=12.584us    |
+| PROCESS  | p50=0.042us     | p90=0.042us     | p99=0.042us     |
+| TOTAL    | p50=133.667us   | p90=202.208us   | p99=631.625us   |
+ - Significantly worse than JSON (I thought it would be faster just cuz it's string parsing)  
+ - Dispatch times similar to above, probably just cpu error  
+ - Process times also similar to above  
+ - Will try basic basic string parsing next to see if it's faster  
