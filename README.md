@@ -12,7 +12,8 @@ nholmann json, stod, 1000 samples
 | PROCESS  | p50=0.042us     | p90=0.042us     | p99=0.083us     |
 | TOTAL    | p50=21.042us    | p90=46.458us    | p99=128.916us   |
  - High parse times (likely due to JSON and stod) 
- - Wildly varying dispatch times (possibly system error?)
+ - ~~Wildly varying dispatch times (possibly system error?)~~
+ - EDIT: Was because I was calculating stod as part of dispatch, will retest another time  
  - Process times look ok 
 
 
@@ -26,6 +27,21 @@ regex, stod, 1000 samples
 | PROCESS  | p50=0.042us     | p90=0.042us     | p99=0.042us     |
 | TOTAL    | p50=133.667us   | p90=202.208us   | p99=631.625us   |
  - Significantly worse than JSON (I thought it would be faster just cuz it's string parsing)  
- - Dispatch times similar to above, probably just cpu error  
+ - ~~Dispatch times similar to above, probably just cpu error~~
+ - EDIT: Was because I was calculating stod as part of dispatch, refer to simdjson and below for proper process times
  - Process times also similar to above  
- - Will try basic basic string parsing next to see if it's faster  
+ - Will try basic basic string parsing next to see if it's faster
+
+# simdjson  
+commit af1ce97b779d460178dd120eb34463e0f4c79cf5  
+simdjson, stod, 1000 samples  
+|Step      |Median Percentile|90th Percentile  |99th Percentile  |
+|----------|-----------------|-----------------|-----------------|
+| PARSE    | p50=6.25us      | p90=15.292us    | p99=57.209us    |
+| DISPATCH | p50=0.042us     | p90=0.291us     | p99=0.459us     |
+| PROCESS  | p50=0.041us     | p90=0.042us     | p99=0.042us     |
+| TOTAL    | p50=6.291us     | p90=15.459us    | p99=57.458us    |
+- Significantly better than nohlman json, roughly threefold faster
+- simdjson is optimized for fast parsing
+- Dispatch and process times are very quick, as expected from trivial calculations
+- Will test rapidjson and then custom parsing
