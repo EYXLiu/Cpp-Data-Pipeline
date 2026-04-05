@@ -6,8 +6,9 @@ CXXFLAGS = -std=c++20 -Wall -Wextra -pthread \
 			-I/opt/homebrew/opt/openssl@3/include \
 			-I/opt/homebrew/include
 LDFLAGS = -L/opt/homebrew/opt/boost/lib \
-          -L/opt/homebrew/opt/openssl@3/lib
-LDLIBS = -lssl -lcrypto
+          -L/opt/homebrew/opt/openssl@3/lib \
+		  -L/opt/homebrew/lib
+LDLIBS = -lssl -lcrypto -lsimdjson
 
 EXEC = nr
 SRC = main.cpp ./src/*.cpp

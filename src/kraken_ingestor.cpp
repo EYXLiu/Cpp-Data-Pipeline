@@ -3,7 +3,7 @@
 #include <boost/beast/ssl.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-#include <nlohmann/json.hpp>
+#include <simdjson.h>
 #include <iostream>
 
 KrakenDataIngestor::KrakenDataIngestor(Callback cb) : callback_(cb) {}
@@ -63,40 +63,55 @@ uint64_t KrakenDataIngestor::now_ns() {
 
 // rapidjson, simdjson
 void KrakenDataIngestor::handle_message(const std::string& msg) {
-    using json = nlohmann::json;
+    using namespace simdjson;
+    ondemand::parser parser;
 
+    uint64_t ingested = now_ns();
     try {
-        uint64_t ingested = now_ns();
+        padded_string padded(msg.data(), msg.size());
 
-        auto j = json::parse(msg);
+        auto j = parser.iterate(padded);
+        ondemand::array top = j.get_array();
 
-        if (!j.is_array()) return;
+        auto it = top.begin();
+        ++it;
 
-        auto& data = j[1];
+        ondemand::object data = (*it).get_object();
 
-        uint64_t parsed = now_ns();
+        ondemand::array bids;
+        if (data["b"].get_array().get(bids) == SUCCESS) {
+            for (ondemand::array bid : bids) {
+                auto it = bid.begin();
 
-        if (data.contains("b")) {
-            for (auto& bid : data["b"]) {
+                std::string_view price_str = (*it).get_string();
+                ++it;
+                std::string_view qty_str = (*it).get_string();
+
                 BookUpdate u;
-                u.price = std::stod(bid[0].get<std::string>());
-                u.qty   = std::stod(bid[1].get<std::string>());
+                u.price = std::stod(std::string(price_str));
+                u.qty   = std::stod(std::string(qty_str));
                 u.is_bid = true;
                 u.t_ingest = ingested;
-                u.t_parsed = parsed;
+                u.t_parsed = now_ns();
 
                 callback_(u);
             }
         }
 
-        if (data.contains("a")) {
-            for (auto& ask : data["a"]) {
+        if (data["a"].get_array().get(bids) == SUCCESS) {
+            for (ondemand::array bid : bids) {
+                auto it = bid.begin();
+
+                std::string_view price_str = (*it).get_string();
+                ++it;
+                std::string_view qty_str = (*it).get_string();
+
                 BookUpdate u;
-                u.price = std::stod(ask[0].get<std::string>());
-                u.qty   = std::stod(ask[1].get<std::string>());
-                u.is_bid = false;
+                u.price = std::stod(std::string(price_str));
+                u.qty   = std::stod(std::string(qty_str));
+                u.is_bid = true;
                 u.t_ingest = ingested;
-                u.t_parsed = parsed;
+                u.t_parsed = now_ns();
 
                 callback_(u);
             }
