@@ -117,10 +117,10 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
             }
         }
     }
-    catch (const std::exception& e) {
-        std::cerr << "handle_message error: " << e.what() << "\n";
-    }
+    // catch (const std::exception& e) {
+    //     std::cerr << "handle_message error: " << e.what() << "\n";
+    // }
     catch (...) {
-        std::cerr << "handle_message unknown error\n";
+        
     }
 }
