@@ -3,7 +3,7 @@
 #include <boost/beast/ssl.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-#include <simdjson.h>
+#include <rapidjson/document.h>
 #include <iostream>
 
 KrakenDataIngestor::KrakenDataIngestor(Callback cb) : callback_(cb) {}
@@ -62,33 +62,32 @@ uint64_t KrakenDataIngestor::now_ns() {
 }
 
 void KrakenDataIngestor::handle_message(const std::string& msg) {
-    using namespace simdjson;
-    ondemand::parser parser;
+    using namespace rapidjson;
 
     uint64_t ingested = now_ns();
+
     try {
-        padded_string padded(msg.data(), msg.size());
+        Document doc;
+        doc.Parse(msg.c_str());
 
-        auto j = parser.iterate(padded);
-        ondemand::array top = j.get_array();
+        if (!doc.IsArray() || doc.Size() < 2) return;
 
-        auto it = top.begin();
-        ++it;
+        const Value& data = doc[1];
+        if (!data.IsObject()) return;
 
-        ondemand::object data = (*it).get_object();
+        if (data.HasMember("b") && data["b"].IsArray()) {
+            const Value& bids = data["b"];
 
-        ondemand::array bids;
-        if (data["b"].get_array().get(bids) == SUCCESS) {
-            for (ondemand::array bid : bids) {
-                auto it = bid.begin();
+            for (auto& bid : bids.GetArray()) {
+                if (!bid.IsArray() || bid.Size() < 2)
+                    continue;
 
-                std::string_view price_str = (*it).get_string();
-                ++it;
-                std::string_view qty_str = (*it).get_string();
+                const char* price_str = bid[0].GetString();
+                const char* qty_str   = bid[1].GetString();
 
                 BookUpdate u;
-                u.price = std::stod(std::string(price_str));
-                u.qty   = std::stod(std::string(qty_str));
+                u.price = std::stod(price_str);
+                u.qty   = std::stod(qty_str);
                 u.is_bid = true;
                 u.t_ingest = ingested;
                 u.t_parsed = now_ns();
@@ -97,18 +96,20 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
             }
         }
 
-        if (data["a"].get_array().get(bids) == SUCCESS) {
-            for (ondemand::array bid : bids) {
-                auto it = bid.begin();
+        if (data.HasMember("a") && data["a"].IsArray()) {
+            const Value& asks = data["a"];
 
-                std::string_view price_str = (*it).get_string();
-                ++it;
-                std::string_view qty_str = (*it).get_string();
+            for (auto& ask : asks.GetArray()) {
+                if (!ask.IsArray() || ask.Size() < 2)
+                    continue;
+
+                const char* price_str = ask[0].GetString();
+                const char* qty_str   = ask[1].GetString();
 
                 BookUpdate u;
-                u.price = std::stod(std::string(price_str));
-                u.qty   = std::stod(std::string(qty_str));
-                u.is_bid = false;
+                u.price = std::stod(price_str);
+                u.qty   = std::stod(qty_str);
+                u.is_bid = true;
                 u.t_ingest = ingested;
                 u.t_parsed = now_ns();
 
