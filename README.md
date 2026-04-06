@@ -45,3 +45,18 @@ simdjson, stod, 1000 samples
 - simdjson is optimized for fast parsing
 - Dispatch and process times are very quick, as expected from trivial calculations
 - Will test rapidjson and then custom parsing
+
+# rapidjson
+commit 643bee7f702f65b591d067e40e6eb7572a81fddf  
+rapidjson, stod, 1000 samples  
+|Step      |Median Percentile|90th Percentile  |99th Percentile  |
+|----------|-----------------|-----------------|-----------------|
+| PARSE    | p50=14.5us      | p90=43.666us    | p99=225.834us   |
+| DISPATCH | p50=0.042us     | p90=0.708us     | p99=1.291us     |
+| PROCESS  | p50=0.042us     | p90=0.042us     | p99=0.084us     |
+| TOTAL    | p50=14.666us    | p90=44.5us      | p99=226us       |
+- Slightly worse than simdjson, still better than nohlman json though  
+- warning: rapidjson is depricated (uses std::iterator which has depricated since c++17)  
+- still usable, but will generate warnings; currently on c++20, make sure the current c++ version has only depricated and not fully removed std::iterator  
+- Dispatch and process times same as above  
+- Will test custom parsing now  
