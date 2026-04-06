@@ -33,7 +33,7 @@ regex, stod, 1000 samples
  - Will try basic basic string parsing next to see if it's faster
 
 # simdjson  
-commit af1ce97b779d460178dd120eb34463e0f4c79cf5  
+commit e32f2e302a5bf2491476985b63a4f9165e7fe351  
 simdjson, stod, 1000 samples  
 |Step      |Median Percentile|90th Percentile  |99th Percentile  |
 |----------|-----------------|-----------------|-----------------|
