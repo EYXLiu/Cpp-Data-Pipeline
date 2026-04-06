@@ -61,7 +61,6 @@ uint64_t KrakenDataIngestor::now_ns() {
     return ts.tv_sec * 1e9 + ts.tv_nsec;
 }
 
-// rapidjson, simdjson
 void KrakenDataIngestor::handle_message(const std::string& msg) {
     using namespace simdjson;
     ondemand::parser parser;
@@ -109,7 +108,7 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
                 BookUpdate u;
                 u.price = std::stod(std::string(price_str));
                 u.qty   = std::stod(std::string(qty_str));
-                u.is_bid = true;
+                u.is_bid = false;
                 u.t_ingest = ingested;
                 u.t_parsed = now_ns();
 
@@ -121,6 +120,6 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
     //     std::cerr << "handle_message error: " << e.what() << "\n";
     // }
     catch (...) {
-        
+
     }
 }
