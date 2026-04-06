@@ -56,7 +56,7 @@ rapidjson, stod, 1000 samples
 | PROCESS  | p50=0.042us     | p90=0.042us     | p99=0.084us     |
 | TOTAL    | p50=14.666us    | p90=44.5us      | p99=226us       |
 - Slightly worse than simdjson, still better than nohlman json though  
-- warning: rapidjson is depricated (uses std::iterator which has depricated since c++17)  
-- still usable, but will generate warnings; currently on c++20, make sure the current c++ version has only depricated and not fully removed std::iterator  
+- warning: rapidjson is deprecated (uses std::iterator which has deprecated since c++17)  
+- still usable, but will generate warnings; currently on c++20, make sure the current c++ version has only deprecated and not fully removed std::iterator  
 - Dispatch and process times same as above  
 - Will test custom parsing now  
