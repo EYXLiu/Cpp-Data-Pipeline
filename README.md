@@ -59,4 +59,16 @@ rapidjson, stod, 1000 samples
 - warning: rapidjson is deprecated (uses std::iterator which has deprecated since c++17)  
 - still usable, but will generate warnings; currently on c++20, make sure the current c++ version has only deprecated and not fully removed std::iterator  
 - Dispatch and process times same as above  
-- Will test custom parsing now  
+- Will test custom parsing now
+
+# simdjson small test  
+commit ae56dcdefb03e4cbd6347816ee326f5f71a3dec0  
+simdjson, no stod (passed as a string), 1000 samples  
+|Step      |Median Percentile|90th Percentile  |99th Percentile  |
+|----------|-----------------|-----------------|-----------------|
+| PARSE    | p50=4.083us     | p90=11.917us    | p99=87.667us    |
+| DISPATCH | p50=0.042us     | p90=0.292us     | p99=0.625us     |
+| PROCESS  | p50=0us         | p90=0.042us     | p99=0.042us     |
+| TOTAL    | p50=4.125us     | p90=12.25us     | p99=87.792us    |
+- testing out the effect of stod (as apparently it's slow)  
+- can see that it's roughly 2us, which is pretty time that can be alleviated  
