@@ -5,6 +5,7 @@
 #include <boost/asio/ssl.hpp>
 #include <simdjson.h>
 #include <iostream>
+#include <charconv>
 
 KrakenDataIngestor::KrakenDataIngestor(Callback cb) : callback_(cb) {}
 
@@ -86,9 +87,17 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
                 ++it;
                 std::string_view qty_str = (*it).get_string();
 
+                double price_d, qty_d;
+                auto price_res = std::from_chars(price_str.data(), price_str.data() + price_str.size(), price_d);
+                auto qty_res = std::from_chars(qty_str.data(), qty_str.data() + qty_str.size(), qty_d);
+                
+                if (price_res.ec != std::errc() || qty_res.ec != std::errc()) {
+                    throw;
+                }
+
                 BookUpdate u;
-                u.price = std::string(price_str);
-                u.qty   = std::string(qty_str);
+                u.price = price_d;
+                u.qty   = qty_d;
                 u.is_bid = true;
                 u.t_ingest = ingested;
                 u.t_parsed = now_ns();
@@ -106,9 +115,17 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
                 ++it;
                 std::string_view qty_str = (*it).get_string();
 
+                double price_d, qty_d;
+                auto price_res = std::from_chars(price_str.data(), price_str.data() + price_str.size(), price_d);
+                auto qty_res = std::from_chars(qty_str.data(), qty_str.data() + qty_str.size(), qty_d);
+                
+                if (price_res.ec != std::errc() || qty_res.ec != std::errc()) {
+                    throw;
+                }
+
                 BookUpdate u;
-                u.price = std::string(price_str);
-                u.qty   = std::string(qty_str);
+                u.price = price_d;
+                u.qty   = qty_d;
                 u.is_bid = false;
                 u.t_ingest = ingested;
                 u.t_parsed = now_ns();
