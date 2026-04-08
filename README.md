@@ -1,6 +1,12 @@
 # Latency Focused Data Pipeline
-Tech stack: C++, Kraken Websocket  
-Previously was a networking runtime, being repurposed to a C++ data pipeline, focusing on latency (I lost track of what I was doing and wanted a clear goal)
+**Tech stack:** C++, Kraken Websocket  
+**Libraries tested:** nlohmann/json, regex, simdjson, rapidjson, from_chars  
+Previously was a networking runtime, being repurposed to a C++ data pipeline (I lost track of what I was doing and wanted a clear goal)  
+In an effort to have a clear goal, I've changed it to a complete data pipeline from kraken to the reactor output, focusing on latency in C++  
+Currently working on the ingestor aspect to it, measuring kraken -> queue times  
+Comparing and optimizing JSON libraries, zero copy buffers, and their effect on parsing, dispatch, and processing times  
+The tables below show all the benchmarks, starting from earliest commit to latest  
+In the future, I will test with more samples to have a better distribution of data  
 
 ## simdjson + from_chars
 commit b5c723cf2151464d3b743d7df300405bea3eabc8  
@@ -13,7 +19,7 @@ simdjson, from_chars, 1000 samples
 | TOTAL    | p50=3.333us     | p90=12.75us     | p99=50.875us    |
 - using from_chars, even faster than the previous commit
 - previous commit had to allocate memory, copy over the string, and then store it in the object
-- this is a result of simdjson using string_view and not C++ strings, so it forces a copy when converting
+- this is a result of simdjson using string_view and not C++ strings, so it forces a copy when converting (was not aware previously)
 - from_chars is zerocopy, so it's even faster than not converting to a double
 
 ## simdjson small test  
@@ -74,7 +80,7 @@ regex, stod, 1000 samples
 
 ## Inital baseline 
 commit 8cac493da0753205929f9d66786bf87fa9a778fd  
-nholmann json, stod, 1000 samples  
+nlohmann json, stod, 1000 samples  
 |Step      |Median Percentile|90th Percentile  |99th Percentile  |
 |----------|-----------------|-----------------|-----------------|
 | PARSE    | p50=18.959us    | p90=36.083us    | p99=60.791us    |
