@@ -2,7 +2,7 @@
 Tech stack: C++, Kraken Websocket  
 Previously was a networking runtime, being repurposed to a C++ data pipeline, focusing on latency (I lost track of what I was doing and wanted a clear goal)
 
-# simdjson + from_chars
+## simdjson + from_chars
 commit b5c723cf2151464d3b743d7df300405bea3eabc8  
 simdjson, from_chars, 1000 samples
 |Step      |Median Percentile|90th Percentile  |99th Percentile  |
@@ -16,7 +16,7 @@ simdjson, from_chars, 1000 samples
 - this is a result of simdjson using string_view and not C++ strings, so it forces a copy when converting
 - from_chars is zerocopy, so it's even faster than not converting to a double
 
-# simdjson small test  
+## simdjson small test  
 commit ae56dcdefb03e4cbd6347816ee326f5f71a3dec0  
 simdjson, no stod (passed as a string), 1000 samples  
 |Step      |Median Percentile|90th Percentile  |99th Percentile  |
@@ -28,7 +28,7 @@ simdjson, no stod (passed as a string), 1000 samples
 - testing out the effect of stod (as apparently it's slow)  
 - can see that it's roughly 2us, which is pretty time that can be alleviated
 
-# rapidjson
+## rapidjson
 commit 643bee7f702f65b591d067e40e6eb7572a81fddf  
 rapidjson, stod, 1000 samples  
 |Step      |Median Percentile|90th Percentile  |99th Percentile  |
@@ -43,7 +43,7 @@ rapidjson, stod, 1000 samples
 - Dispatch and process times same as above  
 - Will test custom parsing now
 
-# simdjson  
+## simdjson  
 commit e32f2e302a5bf2491476985b63a4f9165e7fe351  
 simdjson, stod, 1000 samples  
 |Step      |Median Percentile|90th Percentile  |99th Percentile  |
@@ -57,7 +57,7 @@ simdjson, stod, 1000 samples
 - Dispatch and process times are very quick, as expected from trivial calculations
 - Will test rapidjson and then custom parsing
 
-# REGEX
+## REGEX
 commit 14798d2b860cdf4a2fb91d3532168a126b1b1dcc  
 regex, stod, 1000 samples  
 |Step      |Median Percentile|90th Percentile  |99th Percentile  |
@@ -72,7 +72,7 @@ regex, stod, 1000 samples
  - Process times also similar to above  
  - Will try basic basic string parsing next to see if it's faster
 
-# Inital baseline 
+## Inital baseline 
 commit 8cac493da0753205929f9d66786bf87fa9a778fd  
 nholmann json, stod, 1000 samples  
 |Step      |Median Percentile|90th Percentile  |99th Percentile  |
