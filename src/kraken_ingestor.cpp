@@ -87,8 +87,8 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
                 std::string_view qty_str = (*it).get_string();
 
                 BookUpdate u;
-                u.price = std::stod(std::string(price_str));
-                u.qty   = std::stod(std::string(qty_str));
+                u.price = std::string(price_str);
+                u.qty   = std::string(qty_str);
                 u.is_bid = true;
                 u.t_ingest = ingested;
                 u.t_parsed = now_ns();
@@ -107,8 +107,8 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
                 std::string_view qty_str = (*it).get_string();
 
                 BookUpdate u;
-                u.price = std::stod(std::string(price_str));
-                u.qty   = std::stod(std::string(qty_str));
+                u.price = std::string(price_str);
+                u.qty   = std::string(qty_str);
                 u.is_bid = false;
                 u.t_ingest = ingested;
                 u.t_parsed = now_ns();

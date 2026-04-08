@@ -51,10 +51,10 @@ void metricsThread(MetricsQueue& q) {
             auto [p50_proc, p90_proc, p99_proc] = report(process_samples);
             auto [p50_total, p90_total, p99_total] = report(total_samples);
 
-            std::cout << "PARSE    p50=" << p50_parse / 1000.0 << "us p90=" << p90_parse / 1000.0 << "us p99=" << p99_parse / 1000.0 << "us\n";
-            std::cout << "DISPATCH p50=" << p50_dispatch  / 1000.0 << "us p90=" << p90_dispatch  / 1000.0 << "us p99=" << p99_dispatch  / 1000.0 << "us\n";
-            std::cout << "PROCESS  p50=" << p50_proc  / 1000.0 << "us p90=" << p90_proc  / 1000.0 << "us p99=" << p99_proc  / 1000.0 << "us\n";
-            std::cout << "TOTAL    p50=" << p50_total / 1000.0 << "us p90=" << p90_total  / 1000.0 << "us p99=" << p99_total / 1000.0 << "us\n";
+            std::cout << "PARSE    | p50=" << p50_parse / 1000.0 << "us | p90=" << p90_parse / 1000.0 << "us | p99=" << p99_parse / 1000.0 << "us |\n";
+            std::cout << "DISPATCH | p50=" << p50_dispatch  / 1000.0 << "us | p90=" << p90_dispatch  / 1000.0 << "us | p99=" << p99_dispatch  / 1000.0 << "us |\n";
+            std::cout << "PROCESS  | p50=" << p50_proc  / 1000.0 << "us | p90=" << p90_proc  / 1000.0 << "us | p99=" << p99_proc  / 1000.0 << "us |\n";
+            std::cout << "TOTAL    | p50=" << p50_total / 1000.0 << "us | p90=" << p90_total  / 1000.0 << "us | p99=" << p99_total / 1000.0 << "us |\n";
             std::cout << "-----------------------------\n";
 
             parse_samples.clear();
