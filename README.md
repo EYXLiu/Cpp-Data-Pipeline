@@ -8,6 +8,19 @@ Comparing and optimizing JSON libraries, zero copy buffers, and their effect on 
 The tables below show all the benchmarks, starting from earliest commit to latest  
 In the future, I will test with more samples to have a better distribution of data  
 
+## simdjson + from_chars + book buffer pool  
+commit 5bb36636ffd38c729854413e6d27e44e8f2a6683  
+simdjson, from_chars, buffer pool, 1000 samples  
+|Step      |Median Percentile|90th Percentile  |99th Percentile  |
+|----------|-----------------|-----------------|-----------------|
+| PARSE    | p50=2.5us       | p90=10us        | p99=34.833us    |
+| DISPATCH | p50=0.041us     | p90=0.042us     | p99=0.292us     |
+| PROCESS  | p50=0.041us     | p90=0.042us     | p99=0.042us     |
+| TOTAL    | p50=2.542us     | p90=10.25us     | p99=35.125us    |
+- using buffer pool now, so no allocation and deallocation of memory for each buffer
+- can notice slight change (~0.75us) of parsing time
+- 90 and 99th percentile still slightly larger, possibly due to simdjson garbage collection)
+
 ## simdjson + from_chars
 commit b5c723cf2151464d3b743d7df300405bea3eabc8  
 simdjson, from_chars, 1000 samples
