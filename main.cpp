@@ -1,4 +1,4 @@
-#include <buffer_pool.hpp>
+#include <book_buffer_pool.hpp>
 #include <kraken_ingestor.hpp>
 #include <thread>
 #include <iostream>
@@ -23,9 +23,11 @@ void handleBookUpdate(BookUpdate& u) {
 }
 
 int main() {
+    BookBufferPool book_pool(sizeof(BookUpdate) * 128, 64);
+
     std::thread t(metricsThread, std::ref(metrics_q));
     t.detach();
 
-    KrakenDataIngestor ingestor(handleBookUpdate);
+    KrakenDataIngestor ingestor(handleBookUpdate, book_pool);
     ingestor.start();
 }

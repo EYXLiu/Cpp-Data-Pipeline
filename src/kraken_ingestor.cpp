@@ -7,7 +7,7 @@
 #include <iostream>
 #include <charconv>
 
-KrakenDataIngestor::KrakenDataIngestor(Callback cb) : callback_(cb) {}
+KrakenDataIngestor::KrakenDataIngestor(Callback cb, BookBufferPool& book_pool) : callback_(cb), book_pool_(book_pool) {}
 
 void KrakenDataIngestor::start() {
     namespace beast = boost::beast;
@@ -68,6 +68,8 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
 
     uint64_t ingested = now_ns();
     try {
+        BookUpdateBuffer buf = book_pool_.acquire();
+
         padded_string padded(msg.data(), msg.size());
 
         auto j = parser.iterate(padded);
@@ -81,6 +83,8 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
         ondemand::array bids;
         if (data["b"].get_array().get(bids) == SUCCESS) {
             for (ondemand::array bid : bids) {
+                if (buf.used >= buf.size) break;
+
                 auto it = bid.begin();
 
                 std::string_view price_str = (*it).get_string();
@@ -95,7 +99,7 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
                     throw;
                 }
 
-                BookUpdate u;
+                BookUpdate& u = buf.data[buf.used++];;
                 u.price = price_d;
                 u.qty   = qty_d;
                 u.is_bid = true;
@@ -109,6 +113,8 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
         ondemand::array asks;
         if (data["a"].get_array().get(asks) == SUCCESS) {
             for (ondemand::array ask : asks) {
+                if (buf.used >= buf.size) break;
+
                 auto it = ask.begin();
 
                 std::string_view price_str = (*it).get_string();
@@ -123,7 +129,7 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
                     throw;
                 }
 
-                BookUpdate u;
+                BookUpdate& u = buf.data[buf.used++];;
                 u.price = price_d;
                 u.qty   = qty_d;
                 u.is_bid = false;
@@ -133,10 +139,15 @@ void KrakenDataIngestor::handle_message(const std::string& msg) {
                 callback_(u);
             }
         }
+
+        book_pool_.release(buf);
     }
     // catch (const std::exception& e) {
     //     std::cerr << "handle_message error: " << e.what() << "\n";
     // }
+    catch (const std::runtime_error& e) {
+        std::cerr << "handle_message error: " << e.what() << "\n";
+    }
     catch (...) {
 
     }
